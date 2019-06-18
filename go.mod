@@ -3,6 +3,7 @@ module SnowBrick-Backend
 go 1.12
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/bilibili/kratos v0.0.0-20190514073948-5b9631bb15d6
 	github.com/gogo/protobuf v1.2.1
 	github.com/golang/protobuf v1.3.1

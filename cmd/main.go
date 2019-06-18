@@ -1,6 +1,8 @@
 package main
 
 import (
+	"SnowBrick-Backend/conf"
+	"SnowBrick-Backend/internal/server/rpc"
 	"context"
 	"flag"
 	"os"
@@ -8,25 +10,31 @@ import (
 	"syscall"
 	"time"
 
-	"SnowBrick-Backend/internal/server/grpc"
 	"SnowBrick-Backend/internal/server/http"
 	"SnowBrick-Backend/internal/service"
 
-	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
 )
 
 func main() {
 	flag.Parse()
-	if err := paladin.Init(); err != nil {
+	if err := conf.Init(); err != nil {
+		log.Error("conf.Init() error(%v)", err)
 		panic(err)
 	}
-	log.Init(nil) // debug flag: log.dir={path}
+
+	// init log
+	log.Init(conf.Conf.Log)
 	defer log.Close()
 	log.Info("SnowBrick-Backend start")
-	svc := service.New()
-	grpcSrv := grpc.New(svc)
-	httpSrv := http.New(svc)
+
+	// init service
+	svc := service.New(conf.Conf)
+	// init rpc
+	rpcSrv := rpc.New(conf.Conf, svc)
+	// init http
+	httpSrv := http.New(conf.Conf, svc)
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
@@ -34,13 +42,14 @@ func main() {
 		log.Info("get a signal %s", s.String())
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
-			if err := grpcSrv.Shutdown(ctx); err != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.Conf.TimeoutSecond)*time.Second)
+			if err := rpcSrv.Shutdown(ctx); err != nil {
 				log.Error("grpcSrv.Shutdown error(%v)", err)
 			}
 			if err := httpSrv.Shutdown(ctx); err != nil {
 				log.Error("httpSrv.Shutdown error(%v)", err)
 			}
+
 			log.Info("SnowBrick-Backend exit")
 			svc.Close()
 			cancel()

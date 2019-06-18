@@ -1,6 +1,6 @@
 package model
 
-// Kratos hello kratos.
+// Kratos
 type Kratos struct {
-	Hello string
+	Content string
 }

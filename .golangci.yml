@@ -29,8 +29,6 @@ linters-settings:
     locale: US
   lll:
     line-length: 120
-  goimports:
-    local-prefixes: SnowBrick-Backend
   gocritic:
     enabled-tags:
       - performance
@@ -47,6 +45,9 @@ linters:
     - prealloc
     - gochecknoglobals
     - interfacer
+    - goimports
+    - gofmt
+    - gochecknoinits
 
 run:
   skip-dirs:

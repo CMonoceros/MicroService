@@ -1,13 +1,12 @@
 package http
 
 import (
+	"SnowBrick-Backend/conf"
 	"net/http"
 
-	pb "SnowBrick-Backend/api"
 	"SnowBrick-Backend/internal/model"
 	"SnowBrick-Backend/internal/service"
 
-	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
 	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
 )
@@ -17,20 +16,9 @@ var (
 )
 
 // New new a bm server.
-func New(s *service.Service) (engine *bm.Engine) {
-	var (
-		hc struct {
-			Server *bm.ServerConfig
-		}
-	)
-	if err := paladin.Get("http.toml").UnmarshalTOML(&hc); err != nil {
-		if err != paladin.ErrNotExist {
-			panic(err)
-		}
-	}
+func New(c *conf.Config, s *service.Service) (engine *bm.Engine) {
 	svc = s
-	engine = bm.DefaultServer(hc.Server)
-	pb.RegisterDemoBMServer(engine, svc)
+	engine = bm.DefaultServer(c.BM)
 	initRouter(engine)
 	if err := engine.Start(); err != nil {
 		panic(err)
@@ -41,9 +29,7 @@ func New(s *service.Service) (engine *bm.Engine) {
 func initRouter(e *bm.Engine) {
 	e.Ping(ping)
 	g := e.Group("/SnowBrick-Backend")
-	{
-		g.GET("/start", howToStart)
-	}
+	g.GET("/start", start)
 }
 
 func ping(ctx *bm.Context) {
@@ -53,10 +39,9 @@ func ping(ctx *bm.Context) {
 	}
 }
 
-// example for http request handler.
-func howToStart(c *bm.Context) {
+func start(c *bm.Context) {
 	k := &model.Kratos{
-		Hello: "Golang 大法好 !!!",
+		Content: "Golang 大法好 !!!",
 	}
 	c.JSON(k, nil)
 }

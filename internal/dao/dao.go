@@ -1,15 +1,13 @@
 package dao
 
 import (
+	"SnowBrick-Backend/conf"
 	"context"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/cache/memcache"
 	"github.com/bilibili/kratos/pkg/cache/redis"
-	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/database/sql"
 	"github.com/bilibili/kratos/pkg/log"
-	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 // Dao dao.
@@ -17,70 +15,36 @@ type Dao struct {
 	db          *sql.DB
 	redis       *redis.Pool
 	redisExpire int32
-	mc          *memcache.Memcache
-	mcExpire    int32
-}
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
 
 // New new a dao and return.
-func New() (dao *Dao) {
-	var (
-		dc struct {
-			Demo *sql.Config
-		}
-		rc struct {
-			Demo       *redis.Config
-			DemoExpire xtime.Duration
-		}
-		mc struct {
-			Demo       *memcache.Config
-			DemoExpire xtime.Duration
-		}
-	)
-	checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
-	checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
-	checkErr(paladin.Get("memcache.toml").UnmarshalTOML(&mc))
+func New(c *conf.Config) (dao *Dao) {
 	dao = &Dao{
 		// mysql
-		db: sql.NewMySQL(dc.Demo),
+		db: sql.NewMySQL(c.Mysql),
 		// redis
-		redis:       redis.NewPool(rc.Demo),
-		redisExpire: int32(time.Duration(rc.DemoExpire) / time.Second),
-		// memcache
-		mc:       memcache.New(mc.Demo),
-		mcExpire: int32(time.Duration(mc.DemoExpire) / time.Second),
+		redis:       redis.NewPool(c.Redis),
+		redisExpire: int32(time.Duration(c.RedisExpire) / time.Second),
 	}
 	return
 }
 
 // Close close the resource.
 func (d *Dao) Close() {
-	d.mc.Close()
-	d.redis.Close()
-	d.db.Close()
+	if d.db != nil {
+		d.db.Close()
+	}
+	if d.redis != nil {
+		d.redis.Close()
+	}
 }
 
 // Ping ping the resource.
 func (d *Dao) Ping(ctx context.Context) (err error) {
-	if err = d.pingMC(ctx); err != nil {
-		return
-	}
 	if err = d.pingRedis(ctx); err != nil {
 		return
 	}
 	return d.db.Ping(ctx)
-}
-
-func (d *Dao) pingMC(ctx context.Context) (err error) {
-	if err = d.mc.Set(ctx, &memcache.Item{Key: "ping", Value: []byte("pong"), Expiration: 0}); err != nil {
-		log.Error("conn.Set(PING) error(%v)", err)
-	}
-	return
 }
 
 func (d *Dao) pingRedis(ctx context.Context) (err error) {

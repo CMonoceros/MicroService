@@ -1,50 +1,24 @@
 package service
 
 import (
-	"context"
-	"fmt"
-
-	pb "SnowBrick-Backend/api"
+	"SnowBrick-Backend/conf"
 	"SnowBrick-Backend/internal/dao"
-
-	"github.com/bilibili/kratos/pkg/conf/paladin"
-
-	"github.com/golang/protobuf/ptypes/empty"
+	"context"
 )
 
 // Service service.
 type Service struct {
-	ac  *paladin.Map
+	c   *conf.Config
 	dao *dao.Dao
 }
 
 // New new a service and return.
-func New() (s *Service) {
-	var ac = new(paladin.TOML)
-	if err := paladin.Watch("application.toml", ac); err != nil {
-		panic(err)
-	}
+func New(c *conf.Config) (s *Service) {
 	s = &Service{
-		ac:  ac,
-		dao: dao.New(),
+		c:   c,
+		dao: dao.New(c),
 	}
 	return s
-}
-
-// SayHello grpc demo func.
-func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.Empty, err error) {
-	reply = new(empty.Empty)
-	fmt.Printf("hello %s", req.Name)
-	return
-}
-
-// SayHelloURL bm demo func.
-func (s *Service) SayHelloURL(ctx context.Context, req *pb.HelloReq) (reply *pb.HelloResp, err error) {
-	reply = &pb.HelloResp{
-		Content: "hello " + req.Name,
-	}
-	fmt.Printf("hello url %s", req.Name)
-	return
 }
 
 // Ping ping the resource.
