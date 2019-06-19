@@ -1,6 +1,7 @@
 package main
 
 import (
+	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/conf"
 	"SnowBrick-Backend/internal/server/rpc"
 	"context"
@@ -12,8 +13,6 @@ import (
 
 	"SnowBrick-Backend/internal/server/http"
 	"SnowBrick-Backend/internal/service"
-
-	"github.com/bilibili/kratos/pkg/log"
 )
 
 func main() {

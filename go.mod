@@ -5,14 +5,10 @@ go 1.12
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/bilibili/kratos v0.0.0-20190514073948-5b9631bb15d6
-	github.com/gogo/protobuf v1.2.1
-	github.com/golang/protobuf v1.3.1
-	github.com/kr/pty v1.1.4 // indirect
-	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a // indirect
-	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6
-	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
+	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/golang/protobuf v1.3.1 // indirect
+	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6 // indirect
 	google.golang.org/grpc v1.20.1
-	gopkg.in/AlecAivazis/survey.v1 v1.8.2 // indirect
 )
 
 replace (

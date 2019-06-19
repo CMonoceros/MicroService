@@ -1,13 +1,13 @@
 package dao
 
 import (
+	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/conf"
 	"context"
 	"time"
 
 	"github.com/bilibili/kratos/pkg/cache/redis"
 	"github.com/bilibili/kratos/pkg/database/sql"
-	"github.com/bilibili/kratos/pkg/log"
 )
 
 // Dao dao.

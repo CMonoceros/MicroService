@@ -1,13 +1,13 @@
 package http
 
 import (
+	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/conf"
 	"net/http"
 
 	"SnowBrick-Backend/internal/model"
 	"SnowBrick-Backend/internal/service"
 
-	"github.com/bilibili/kratos/pkg/log"
 	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
 )
 
