@@ -1,18 +1,25 @@
 package rpc
 
 import (
-	"SnowBrick-Backend/conf"
-	"SnowBrick-Backend/internal/service"
-
-	"github.com/bilibili/kratos/pkg/net/rpc/warden"
+	"context"
+	"google.golang.org/grpc"
 )
 
-// New new a grpc server.
-func New(c *conf.Config, svc *service.Service) *warden.Server {
-	ws := warden.NewServer(c.Warden)
-	ws, err := ws.Start()
-	if err != nil {
-		panic(err)
+type Server struct {
+	server *grpc.Server
+}
+
+func (s *Server) Shutdown(ctx context.Context) (err error) {
+	ch := make(chan struct{})
+	go func() {
+		s.server.GracefulStop()
+		close(ch)
+	}()
+	select {
+	case <-ctx.Done():
+		s.server.Stop()
+		err = ctx.Err()
+	case <-ch:
 	}
-	return ws
+	return
 }

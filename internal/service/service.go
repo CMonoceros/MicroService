@@ -4,12 +4,14 @@ import (
 	"SnowBrick-Backend/conf"
 	"SnowBrick-Backend/internal/dao"
 	"context"
+	"golang.org/x/sync/errgroup"
 )
 
 // Service service.
 type Service struct {
 	c   *conf.Config
 	dao *dao.Dao
+	eg  errgroup.Group
 }
 
 // New new a service and return.
@@ -29,4 +31,8 @@ func (s *Service) Ping(ctx context.Context) (err error) {
 // Close close the resource.
 func (s *Service) Close() {
 	s.dao.Close()
+}
+
+func (s *Service) Go(f func() error) {
+	s.eg.Go(f)
 }

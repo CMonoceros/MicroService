@@ -1,26 +1,31 @@
 package conf
 
 import (
+	"SnowBrick-Backend/common/database/redis"
+	"SnowBrick-Backend/common/database/sql"
+	"SnowBrick-Backend/common/log"
 	"flag"
 	"github.com/BurntSushi/toml"
-	"github.com/bilibili/kratos/pkg/cache/redis"
-	"github.com/bilibili/kratos/pkg/database/sql"
-	"github.com/bilibili/kratos/pkg/log"
-	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden"
-
-	xtime "github.com/bilibili/kratos/pkg/time"
 )
+
+type RPCConfig struct {
+	Addr    string
+	Timeout string
+}
+
+type HttpConfig struct {
+	Addr    string
+	Timeout string
+}
 
 type Config struct {
 	Env           string
 	TimeoutSecond int
 	Log           *log.Config
-	BM            *bm.ServerConfig
-	Warden        *warden.ServerConfig
+	Http          *HttpConfig
+	Grpc          *RPCConfig
 	Mysql         *sql.Config
 	Redis         *redis.Config
-	RedisExpire   xtime.Duration
 }
 
 var (

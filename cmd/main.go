@@ -30,7 +30,7 @@ func main() {
 	// init service
 	svc := service.New(conf.Conf)
 	// init rpc
-	rpcSrv := rpc.New(conf.Conf, svc)
+	rpcSrv := rpc.NewServer(conf.Conf, svc)
 	// init http
 	httpSrv := http.New(conf.Conf, svc)
 

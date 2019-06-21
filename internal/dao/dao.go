@@ -1,19 +1,18 @@
 package dao
 
 import (
+	"SnowBrick-Backend/common/database/redis"
+	"SnowBrick-Backend/common/database/sql"
 	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/conf"
 	"context"
-	"time"
-
-	"github.com/bilibili/kratos/pkg/cache/redis"
-	"github.com/bilibili/kratos/pkg/database/sql"
+	redigo "github.com/gomodule/redigo/redis"
 )
 
 // Dao dao.
 type Dao struct {
 	db          *sql.DB
-	redis       *redis.Pool
+	redis       *redigo.Pool
 	redisExpire int32
 }
 
@@ -23,8 +22,7 @@ func New(c *conf.Config) (dao *Dao) {
 		// mysql
 		db: sql.NewMySQL(c.Mysql),
 		// redis
-		redis:       redis.NewPool(c.Redis),
-		redisExpire: int32(time.Duration(c.RedisExpire) / time.Second),
+		redis: redis.NewPool(c.Redis),
 	}
 	return
 }
@@ -48,10 +46,10 @@ func (d *Dao) Ping(ctx context.Context) (err error) {
 }
 
 func (d *Dao) pingRedis(ctx context.Context) (err error) {
-	conn := d.redis.Get(ctx)
+	conn := d.redis.Get()
 	defer conn.Close()
-	if _, err = conn.Do("SET", "ping", "pong"); err != nil {
-		log.Error("conn.Set(PING) error(%v)", err)
+	if _, err = conn.Do("PING"); err != nil {
+		log.Error("conn.PING error(%v)", err)
 	}
 	return
 }

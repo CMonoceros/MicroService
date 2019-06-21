@@ -2,56 +2,176 @@ package log
 
 import (
 	"context"
-	"github.com/bilibili/kratos/pkg/log"
+	"fmt"
+	"io"
+	"os"
 )
 
-func Init(conf *log.Config) {
-	log.Init(conf)
+// Config log config.
+type Config struct {
+	Family string
+	Host   string
+
+	// stdout
+	Stdout bool
+
+	// file
+	Dir string
+	// buffer size
+	FileBufferSize int64
+	// MaxLogFile
+	MaxLogFile int
+	// RotateSize
+	RotateSize int64
+
+	// V Enable V-leveled logging at the specified level.
+	V int32
+	// Module=""
+	// The syntax of the argument is a map of pattern=N,
+	// where pattern is a literal file name (minus the ".go" suffix) or
+	// "glob" pattern and N is a V level. For instance:
+	// [module]
+	//   "service" = 1
+	//   "dao*" = 2
+	// sets the V level to 2 in all Go files whose names begin "dao".
+	Module map[string]int32
+	// Filter tell log handler which field are sensitive message, use * instead.
+	Filter []string
+}
+
+// Render render log output
+type Render interface {
+	Render(io.Writer, map[string]interface{}) error
+	RenderString(map[string]interface{}) string
+}
+
+var (
+	h Handler
+	c *Config
+
+	fileHandler *FileHandler
+)
+
+func init() {
+	host, _ := os.Hostname()
+	c = &Config{
+		Host: host,
+	}
+	h = newHandlers([]string{}, NewStdout())
+}
+
+var (
+	_v      int
+	_stdout bool
+	_dir    string
+	_filter logFilter
+	_module = verboseModule{}
+)
+
+// Init create logger with context.
+func Init(conf *Config) {
+	var isNil bool
+	if conf == nil {
+		isNil = true
+		conf = &Config{
+			Stdout: _stdout,
+			Dir:    _dir,
+			V:      int32(_v),
+			Module: _module,
+			Filter: _filter,
+		}
+	}
+	if len(conf.Host) == 0 {
+		host, _ := os.Hostname()
+		conf.Host = host
+	}
+
+	var hs []Handler
+	// when env is dev
+	if conf.Stdout || isNil {
+		hs = append(hs, NewStdout())
+	}
+	if conf.Dir != "" {
+		fileHandler = NewFile(conf.Dir, conf.FileBufferSize, conf.RotateSize, conf.MaxLogFile)
+		hs = append(hs, fileHandler)
+	}
+	h = newHandlers(conf.Filter, hs...)
+	c = conf
 }
 
 // Info logs a message at the info log level.
 func Info(format string, args ...interface{}) {
-	log.Info(format, args...)
+	h.Log(context.Background(), _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Warn logs a message at the warning log level.
 func Warn(format string, args ...interface{}) {
-	log.Warn(format, args...)
+	h.Log(context.Background(), _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Error logs a message at the error log level.
 func Error(format string, args ...interface{}) {
-	log.Error(format, args...)
+	h.Log(context.Background(), _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Infoc logs a message at the info log level.
 func Infoc(ctx context.Context, format string, args ...interface{}) {
-	log.Infoc(ctx, format, args...)
+	h.Log(ctx, _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Errorc logs a message at the error log level.
 func Errorc(ctx context.Context, format string, args ...interface{}) {
-	log.Errorc(ctx, format, args...)
+	h.Log(ctx, _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Warnc logs a message at the warning log level.
 func Warnc(ctx context.Context, format string, args ...interface{}) {
-	log.Warnc(ctx, format, args...)
+	h.Log(ctx, _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Infov logs a message at the info log level.
-func Infov(ctx context.Context, args ...log.D) {
-	log.Infov(ctx, args...)
+func Infov(ctx context.Context, args ...D) {
+	h.Log(ctx, _infoLevel, args...)
 }
 
 // Warnv logs a message at the warning log level.
-func Warnv(ctx context.Context, args ...log.D) {
-	log.Warnv(ctx, args...)
+func Warnv(ctx context.Context, args ...D) {
+	h.Log(ctx, _warnLevel, args...)
 }
 
 // Errorv logs a message at the error log level.
-func Errorv(ctx context.Context, args ...log.D) {
-	log.Errorv(ctx, args...)
+func Errorv(ctx context.Context, args ...D) {
+	h.Log(ctx, _errorLevel, args...)
+}
+
+func logw(args []interface{}) []D {
+	if len(args)%2 != 0 {
+		Warn("log: the variadic must be plural, the last one will ignored")
+	}
+	ds := make([]D, 0, len(args)/2)
+	for i := 0; i < len(args)-1; i = i + 2 {
+		if key, ok := args[i].(string); ok {
+			ds = append(ds, KV(key, args[i+1]))
+		} else {
+			Warn("log: key must be string, get %T, ignored", args[i])
+		}
+	}
+	return ds
+}
+
+// Infow logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Infow(ctx context.Context, args ...interface{}) {
+	h.Log(ctx, _infoLevel, logw(args)...)
+}
+
+// Warnw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Warnw(ctx context.Context, args ...interface{}) {
+	h.Log(ctx, _warnLevel, logw(args)...)
+}
+
+// Errorw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Errorw(ctx context.Context, args ...interface{}) {
+	h.Log(ctx, _errorLevel, logw(args)...)
 }
 
 // SetFormat only effective on stdout and file handler
@@ -69,25 +189,18 @@ func Errorv(ctx context.Context, args ...log.D) {
 // %S full file name and line number: /a/b/c/d.go:23
 // %s final file name element and line number: d.go:23
 func SetFormat(format string) {
-	log.SetFormat(format)
-}
-
-// Infow logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
-func Infow(ctx context.Context, args ...interface{}) {
-	log.Infow(ctx, args...)
-}
-
-// Warnw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
-func Warnw(ctx context.Context, args ...interface{}) {
-	log.Warnw(ctx, args...)
-}
-
-// Errorw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
-func Errorw(ctx context.Context, args ...interface{}) {
-	log.Errorw(ctx, args...)
+	h.SetFormat(format)
 }
 
 // Close close resource.
 func Close() (err error) {
-	return log.Close()
+	err = h.Close()
+	h = _defaultStdout
+	return
+}
+
+func errIncr(lv Level, source string) {
+	if lv == _errorLevel {
+		//todo:增加错误计数
+	}
 }
