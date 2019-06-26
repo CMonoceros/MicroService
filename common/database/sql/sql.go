@@ -24,8 +24,6 @@ var (
 	// In such a case, QueryRow returns a placeholder *Row value that defers
 	// this error until a Scan.
 	ErrNoRows = sql.ErrNoRows
-	// ErrTxDone transaction done.
-	ErrTxDone = sql.ErrTxDone
 )
 
 // DB database.
@@ -111,14 +109,14 @@ type Stmt struct {
 // name and connection information.
 func Open(c *Config) (*DB, error) {
 	db := new(DB)
-	d, err := connect(c, c.DSN)
+	d, err := connect(c, c.DSN.URI)
 	if err != nil {
 		return nil, err
 	}
 	w := &conn{DB: d, conf: c}
 	rs := make([]*conn, 0, len(c.ReadDSN))
 	for _, rd := range c.ReadDSN {
-		d, err := connect(c, rd)
+		d, err := connect(c, rd.URI)
 		if err != nil {
 			return nil, err
 		}
@@ -175,7 +173,7 @@ func (db *DB) Prepared(query string) (stmt *Stmt) {
 func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows *Rows, err error) {
 	idx := db.readIndex()
 	for i := range db.read {
-		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); errcode.EqualError(errcode.ServiceUnavailable, err) {
+		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !errcode.EqualError(errcode.ServiceUnavailable, err) {
 			return
 		}
 	}

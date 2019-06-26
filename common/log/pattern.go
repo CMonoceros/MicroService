@@ -64,7 +64,7 @@ type pattern struct {
 	bufPool sync.Pool
 }
 
-// Render implemet Formater
+// Render implements Formatter
 func (p *pattern) Render(w io.Writer, d map[string]interface{}) error {
 	buf := p.bufPool.Get().(*bytes.Buffer)
 	defer func() {
@@ -79,7 +79,7 @@ func (p *pattern) Render(w io.Writer, d map[string]interface{}) error {
 	return err
 }
 
-// Render implemet Formater as string
+// Render implements Formatter as string
 func (p *pattern) RenderString(d map[string]interface{}) string {
 	// TODO strings.Builder
 	buf := p.bufPool.Get().(*bytes.Buffer)

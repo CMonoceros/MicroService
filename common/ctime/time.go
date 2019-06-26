@@ -49,9 +49,9 @@ func (d *Duration) UnmarshalText(text []byte) error {
 // and return new timeout\context\CancelFunc.
 func (d Duration) Shrink(c context.Context) (Duration, context.Context, context.CancelFunc) {
 	if deadline, ok := c.Deadline(); ok {
-		if ctimeout := time.Until(deadline); ctimeout < time.Duration(d) {
+		if timeout := time.Until(deadline); timeout < time.Duration(d) {
 			// deliver small timeout
-			return Duration(ctimeout), c, func() {}
+			return Duration(timeout), c, func() {}
 		}
 	}
 	ctx, cancel := context.WithTimeout(c, time.Duration(d))

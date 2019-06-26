@@ -22,7 +22,7 @@ type Server struct {
 func (svr *Server) Shutdown(ctx context.Context) error {
 	server := svr.server
 	if server == nil {
-		return errors.New("Http: no server")
+		return errors.New("http: no server")
 	}
 	return errors.WithStack(server.Shutdown(ctx))
 }

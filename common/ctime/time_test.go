@@ -51,7 +51,7 @@ func TestShrinkWithDeadline(t *testing.T) {
 	defer cancel()
 	to, ctx, cancel := d.Shrink(c)
 	defer cancel()
-	if time.Duration(to) >= time.Millisecond*500 {
+	if time.Duration(to) > time.Millisecond*500 {
 		t.Fatalf("new timeout must be less than 500 ms")
 	}
 	if deadline, ok := ctx.Deadline(); !ok || time.Until(deadline) > time.Millisecond*500 || time.Until(deadline) < time.Millisecond*200 {

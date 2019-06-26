@@ -11,7 +11,7 @@ linters-settings:
   golint:
     min-confidence: 0
   gocyclo:
-    min-complexity: 10
+    min-complexity: 20
   maligned:
     suggest-new: true
   dupl:
@@ -46,18 +46,21 @@ linters:
     - gochecknoglobals
     - interfacer
     - goimports
-    - gofmt
     - gochecknoinits
 
 run:
   skip-dirs:
     - api
+    - common
 
 issues:
   exclude-rules:
     - text: "weak cryptographic primitive"
       linters:
         - gosec
+    - linters:
+        - lll
+      path: internal/model/
 
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration

@@ -11,7 +11,7 @@ import (
 func NewServer(c *conf.Config, svc *service.Service) *Server {
 	listener, err := net.Listen("tcp", c.Grpc.Addr)
 	if err != nil {
-		log.Error("", err)
+		log.Error("RPC New server error=%v", err)
 	}
 	s := new(Server)
 	s.server = grpc.NewServer()

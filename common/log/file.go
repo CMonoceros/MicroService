@@ -15,6 +15,7 @@ const (
 	_errorIdx
 	_requestInfoIdx
 	_requestErrorIdx
+	_ormInfoIdx
 	_totalIdx
 )
 
@@ -24,6 +25,7 @@ var _fileNames = map[int]string{
 	_errorIdx:        "error.log",
 	_requestInfoIdx:  "request.log",
 	_requestErrorIdx: "requestError.log",
+	_ormInfoIdx:      "orm.log",
 }
 
 // FileHandler .

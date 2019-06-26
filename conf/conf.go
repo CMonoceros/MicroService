@@ -1,11 +1,13 @@
 package conf
 
 import (
+	"flag"
+
+	"github.com/BurntSushi/toml"
+
 	"SnowBrick-Backend/common/database/redis"
 	"SnowBrick-Backend/common/database/sql"
 	"SnowBrick-Backend/common/log"
-	"flag"
-	"github.com/BurntSushi/toml"
 )
 
 type RPCConfig struct {
@@ -13,7 +15,7 @@ type RPCConfig struct {
 	Timeout string
 }
 
-type HttpConfig struct {
+type HTTPConfig struct {
 	Addr    string
 	Timeout string
 }
@@ -22,7 +24,7 @@ type Config struct {
 	Env           string
 	TimeoutSecond int
 	Log           *log.Config
-	Http          *HttpConfig
+	HTTP          *HTTPConfig
 	Grpc          *RPCConfig
 	Mysql         *sql.Config
 	Redis         *redis.Config

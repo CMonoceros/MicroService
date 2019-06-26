@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-func GetDefaultWriter() io.Writer {
+func GetGinDefaultWriter() io.Writer {
 	return io.MultiWriter(
 		os.Stdout,
 		fileHandler.fws[_requestInfoIdx],
 	)
 }
 
-func GetDefaultErrorWriter() io.Writer {
+func GetGinDefaultErrorWriter() io.Writer {
 	return io.MultiWriter(
 		os.Stderr,
 		fileHandler.fws[_requestErrorIdx],

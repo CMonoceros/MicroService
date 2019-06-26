@@ -2,37 +2,32 @@ package errcode
 
 import (
 	"fmt"
-	"strconv"
-	"sync/atomic"
-
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 var (
-	_messages atomic.Value         // NOTE: stored map[string]map[int]string
-	_codes    = map[int]struct{}{} // register codes.
+	_codes = map[int]string{} // register codes.
 )
-
-// Register register ecode message map.
-func Register(cm map[int]string) {
-	_messages.Store(cm)
-}
 
 // New new a ecode.Codes by int value.
 // NOTE: ecode must unique in global, the New will check repeat and then panic.
-func New(e int) Code {
+func New(e int, msg string) ErrCode {
 	if e <= 0 {
 		panic("business ecode must greater than zero")
 	}
-	return add(e)
+	return add(e, msg)
 }
 
-func add(e int) Code {
+func add(e int, msg string) ErrCode {
 	if _, ok := _codes[e]; ok {
 		panic(fmt.Sprintf("ecode: %d already exist", e))
 	}
-	_codes[e] = struct{}{}
-	return Int(e)
+	_codes[e] = msg
+	return ErrCode{
+		code:    e,
+		message: msg,
+	}
 }
 
 // Codes ecode error interface which has a code & message.
@@ -49,33 +44,28 @@ type Codes interface {
 }
 
 // A Code is an int error code spec.
-type Code int
+type ErrCode struct {
+	code    int
+	message string
+}
 
-func (e Code) Error() string {
-	return strconv.FormatInt(int64(e), 10)
+func (e ErrCode) Error() string {
+	return strconv.FormatInt(int64(e.code), 10)
 }
 
 // Code return error code
-func (e Code) Code() int { return int(e) }
+func (e ErrCode) Code() int { return e.code }
 
 // Message return error message
-func (e Code) Message() string {
-	if cm, ok := _messages.Load().(map[int]string); ok {
-		if msg, ok := cm[e.Code()]; ok {
-			return msg
-		}
-	}
-	return e.Error()
+func (e ErrCode) Message() string {
+	return e.message
 }
 
 // Details return details.
-func (e Code) Details() []interface{} { return nil }
-
-// Int parse code int to error.
-func Int(i int) Code { return Code(i) }
+func (e ErrCode) Details() []interface{} { return nil }
 
 // String parse code string to error.
-func String(e string) Code {
+func String(e string) ErrCode {
 	if e == "" {
 		return OK
 	}
@@ -84,7 +74,14 @@ func String(e string) Code {
 	if err != nil {
 		return ServerErr
 	}
-	return Code(i)
+	if _, ok := _codes[i]; !ok {
+		panic(fmt.Sprintf("ecode: %d not exist", i))
+	}
+
+	return ErrCode{
+		code:    i,
+		message: _codes[i],
+	}
 }
 
 // Cause cause from error to ecode.
