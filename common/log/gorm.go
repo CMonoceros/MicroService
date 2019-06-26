@@ -14,10 +14,6 @@ import (
 	"unicode"
 )
 
-var (
-	logger *ORMLogger
-)
-
 type ORMLogger struct {
 	gorm.LogWriter
 	DataSource string
@@ -67,7 +63,6 @@ func GetORMFormatter(values ...interface{}) (messages []interface{}) {
 			messages = append(messages, fmt.Sprintf("[%.2fms]", float64(values[2].(time.Duration).Nanoseconds()/1e4)/100.0))
 			messages = append(messages, source)
 			messages = append(messages, fmt.Sprintf("[ROWS:%v]\n", strconv.FormatInt(values[5].(int64), 10)))
-			// sql
 
 			for _, value := range values[4].([]interface{}) {
 				indirectValue := reflect.Indirect(reflect.ValueOf(value))
