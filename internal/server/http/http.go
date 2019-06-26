@@ -36,6 +36,7 @@ func New(c *conf.Config, s *service.Service) (server *Server) {
 	if err != nil {
 		log.Error("HTTP New server error=%v", err)
 	}
+
 	s.Go(func() error {
 		return server.server.Serve(listener)
 	})
