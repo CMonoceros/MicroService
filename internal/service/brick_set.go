@@ -3,11 +3,8 @@ package service
 import (
 	"SnowBrick-Backend/common/oss"
 	"fmt"
-	"net/http"
-	"strconv"
-	"time"
-
 	"github.com/gin-gonic/gin"
+	"strconv"
 
 	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/internal/model/req"
@@ -91,16 +88,9 @@ func (s *Service) ListSets(ctx *gin.Context, setReq *req.ListSetsReq) (res []*re
 				eachMediaResp.Duration = media.Duration
 				eachMediaResp.High = media.High
 				eachMediaResp.Width = media.Width
-
-				objectName, e := oss.ParseObjectName(oss.BUCKET_BRICK_SET, media.Src)
+				signSrc, e := bucket.SignUrl(media.Src, "image", "/quality,Q_20")
 				if e != nil {
-					log.Error("ListSets oss.ParseObjectName error(%v)", e)
-					return nil, e
-				}
-				signSrc, e := bucket.SignURL(objectName, http.MethodGet,
-					int64(time.Duration(s.c.Oss.SignExpireTime).Seconds()))
-				if e != nil {
-					log.Error("ListSets bucket.SignURL error(%v)", e)
+					log.Error("ListSets SignUrl error(%v)", err)
 					return nil, e
 				}
 				eachMediaResp.Src = signSrc

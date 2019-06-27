@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/pkg/errors"
+	"net/http"
 	"regexp"
+	"strings"
+	"time"
 )
 
 const (
@@ -21,7 +24,12 @@ type Config struct {
 	SignExpireTime ctime.Duration
 }
 
-func New(c *Config, bucketName string) (bucket *oss.Bucket, err error) {
+type Bucket struct {
+	*oss.Bucket
+	Config *Config
+}
+
+func New(c *Config, bucketName string) (bucket *Bucket, err error) {
 	if endpoint, ok := c.Endpoint[bucketName]; !ok {
 		log.Error("OSS endpoint don't have %s", bucketName)
 		err = errors.WithMessage(errcode.OssConfigError, fmt.Sprintf("端点不存在(%s)", bucketName))
@@ -32,12 +40,15 @@ func New(c *Config, bucketName string) (bucket *oss.Bucket, err error) {
 			log.Error("OSS New client error(%v)", err)
 			return nil, err
 		}
-		bucket, err = client.Bucket(bucketName)
+		ossBucket, err := client.Bucket(bucketName)
 		if err != nil {
 			log.Error("OSS New bucket error(%v)", err)
 			return nil, err
 		}
-		return bucket, nil
+		return &Bucket{
+			Bucket: ossBucket,
+			Config: c,
+		}, nil
 	}
 }
 
@@ -51,4 +62,23 @@ func ParseObjectName(bucketName, src string) (name string, err error) {
 		return
 	}
 	return res[1], nil
+}
+
+func (bucket *Bucket) SignUrl(src string, processParam ...string) (url string, err error) {
+	objectName, err := ParseObjectName(bucket.BucketName, src)
+	if err != nil {
+		log.Error("Bucket.SignUrl ParseObjectName error(%v)", err)
+		return "", err
+	}
+
+	processString := strings.Join(processParam, "")
+	signSrc, err := bucket.SignURL(objectName, http.MethodGet,
+		int64(time.Duration(bucket.Config.SignExpireTime).Seconds()),
+		oss.Process(processString))
+	if err != nil {
+		log.Error("Bucket.SignUrl SignURL error(%v)", err)
+		return "", err
+	}
+
+	return signSrc, nil
 }
