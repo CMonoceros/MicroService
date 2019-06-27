@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/aliyun/aliyun-oss-go-sdk v2.0.0+incompatible
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-sql-driver/mysql v1.4.1
@@ -14,6 +15,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
+	golang.org/x/time v0.0.0-00010101000000-000000000000 // indirect
 	google.golang.org/grpc v1.20.1
 )
 

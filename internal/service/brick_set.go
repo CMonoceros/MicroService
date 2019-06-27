@@ -1,8 +1,11 @@
 package service
 
 import (
+	"SnowBrick-Backend/common/oss"
 	"fmt"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -24,6 +27,12 @@ func (s *Service) ListSets(ctx *gin.Context, setReq *req.ListSetsReq) (res []*re
 	sets, err := s.dao.RawBrickSet(ctx, &setReq.BasePage)
 	if err != nil {
 		log.Error("ListSets RawBrickSet error(%v)", err)
+		return nil, err
+	}
+
+	bucket, err := oss.New(s.c.Oss, oss.BUCKET_BRICK_SET)
+	if err != nil {
+		log.Error("ListSets oss.New error(%v)", err)
 		return nil, err
 	}
 
@@ -82,7 +91,20 @@ func (s *Service) ListSets(ctx *gin.Context, setReq *req.ListSetsReq) (res []*re
 				eachMediaResp.Duration = media.Duration
 				eachMediaResp.High = media.High
 				eachMediaResp.Width = media.Width
-				eachMediaResp.Src = media.Src
+
+				objectName, e := oss.ParseObjectName(oss.BUCKET_BRICK_SET, media.Src)
+				if e != nil {
+					log.Error("ListSets oss.ParseObjectName error(%v)", e)
+					return nil, e
+				}
+				signSrc, e := bucket.SignURL(objectName, http.MethodGet,
+					int64(time.Duration(s.c.Oss.SignExpireTime).Seconds()))
+				if e != nil {
+					log.Error("ListSets bucket.SignURL error(%v)", e)
+					return nil, e
+				}
+				eachMediaResp.Src = signSrc
+
 				mediaList = append(mediaList, eachMediaResp)
 			}
 			eachResp.Media = mediaList

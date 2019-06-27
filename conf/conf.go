@@ -1,8 +1,8 @@
 package conf
 
 import (
+	"SnowBrick-Backend/common/oss"
 	"flag"
-
 	"github.com/BurntSushi/toml"
 
 	"SnowBrick-Backend/common/database/redis"
@@ -28,6 +28,7 @@ type Config struct {
 	Grpc          *RPCConfig
 	Mysql         *sql.Config
 	Redis         *redis.Config
+	Oss           *oss.Config
 }
 
 var (
