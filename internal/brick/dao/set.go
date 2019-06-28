@@ -1,10 +1,10 @@
 package dao
 
 import (
+	"SnowBrick-Backend/internal/brick/model/entity"
 	"context"
 
 	"SnowBrick-Backend/common/log"
-	"SnowBrick-Backend/internal/model/entity"
 )
 
 func (d *Dao) RawBrickSet(c context.Context, page *entity.BasePage) (sets []*entity.BrickSet, err error) {

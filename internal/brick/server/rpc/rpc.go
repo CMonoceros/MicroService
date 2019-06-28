@@ -3,7 +3,7 @@ package rpc
 import (
 	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/conf"
-	"SnowBrick-Backend/internal/service"
+	"SnowBrick-Backend/internal/brick/service"
 	"google.golang.org/grpc"
 	"net"
 )

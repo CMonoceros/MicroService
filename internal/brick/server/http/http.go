@@ -4,7 +4,7 @@ import (
 	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/common/response"
 	"SnowBrick-Backend/conf"
-	"SnowBrick-Backend/internal/service"
+	"SnowBrick-Backend/internal/brick/service"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"

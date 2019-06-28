@@ -2,7 +2,7 @@ package service
 
 import (
 	"SnowBrick-Backend/conf"
-	"SnowBrick-Backend/internal/dao"
+	"SnowBrick-Backend/internal/brick/dao"
 	"context"
 	"golang.org/x/sync/errgroup"
 )

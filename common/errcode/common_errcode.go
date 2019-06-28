@@ -8,4 +8,7 @@ var (
 
 	OssConfigError   = add(-1001, "OSS配置错误")
 	OssResourceError = add(-1002, "OSS资源错误")
+
+	EncryptEncodeError = add(-1101, "加密错误")
+	EncryptDecodeError = add(-1102, "解密错误")
 )

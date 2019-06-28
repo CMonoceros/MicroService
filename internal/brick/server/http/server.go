@@ -1,13 +1,12 @@
 package http
 
 import (
+	"SnowBrick-Backend/internal/brick/service"
 	"context"
 	"github.com/pkg/errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"SnowBrick-Backend/internal/service"
 )
 
 var (

@@ -13,6 +13,7 @@ require (
 	github.com/jinzhu/gorm v1.9.9
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
 	golang.org/x/time v0.0.0-00010101000000-000000000000 // indirect

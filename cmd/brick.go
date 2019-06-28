@@ -3,16 +3,15 @@ package main
 import (
 	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/conf"
-	"SnowBrick-Backend/internal/server/rpc"
+	"SnowBrick-Backend/internal/brick/server/http"
+	"SnowBrick-Backend/internal/brick/server/rpc"
+	"SnowBrick-Backend/internal/brick/service"
 	"context"
 	"flag"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"SnowBrick-Backend/internal/server/http"
-	"SnowBrick-Backend/internal/service"
 )
 
 func main() {

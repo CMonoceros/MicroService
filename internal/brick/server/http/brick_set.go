@@ -3,7 +3,7 @@ package http
 import (
 	"SnowBrick-Backend/common/log"
 	"SnowBrick-Backend/common/response"
-	"SnowBrick-Backend/internal/model/req"
+	"SnowBrick-Backend/internal/brick/model/req"
 	"github.com/gin-gonic/gin"
 )
 

@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"SnowBrick-Backend/common/encrypt"
 	"SnowBrick-Backend/common/oss"
 	"flag"
 	"github.com/BurntSushi/toml"
@@ -29,6 +30,7 @@ type Config struct {
 	Mysql         *sql.Config
 	Redis         *redis.Config
 	Oss           *oss.Config
+	Encrypt       *encrypt.Config
 }
 
 var (

@@ -1,7 +1,7 @@
 package req
 
 import (
-	"SnowBrick-Backend/internal/model/entity"
+	"SnowBrick-Backend/internal/brick/model/entity"
 )
 
 type ListSetsReq struct {
